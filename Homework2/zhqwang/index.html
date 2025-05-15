@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Mental Health Dashboard</title>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+  <style>
+    html, body, #dashboard { margin: 0; padding: 0; width: 100%; height: 100%; }
+    #dashboard { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+    svg { width: 100%; height: 100%; }
+  </style>
+</head>
+<body>
+  <div id="dashboard">
+    <svg id="pieChart" viewBox="0 0 450 400"></svg>
+    <svg id="lineChart" viewBox="0 0 450 400"></svg>
+    <svg id="sankeyChart" viewBox="0 0 950 500" style="grid-column: span 2;"></svg>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>

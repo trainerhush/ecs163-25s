@@ -12,13 +12,16 @@ d3.csv("data/student_mental_health.csv").then(data => {
     const rawDep = (d["Do you have Depression?"] || "").trim()
     d.depressed = rawDep === "Yes" ? "depressed" : "not depressed";
     const courseRaw = (d["What is your course?"] || "").trim().toLowerCase();
-    d.group = art.includes(courseRaw) ? "arts" : "science";
+    d.majorType = art.includes(courseRaw) ? "arts" : "science";
     d.cgpa = (d["What is your CGPA?"] || "").trim();
   });
 
   //Pie Chart
   const pieCounts = d3.rollup(data, v => v.length, d => d.depressed);
-  const pieData = Array.from(pieCounts, ([label, count]) => ({ label, count }));
+  const pieData = [];
+  pieCounts.forEach((count, label) => {
+  pieData.push({ label: label, count: count });
+  });
   const pieArc = d3.arc().innerRadius(0).outerRadius(150);
   const pieLayout = d3.pie().value(d => d.count)(pieData);
   const pieColor = d3.scaleOrdinal(["depressed","not depressed"],["#fc0303","#2003fc"]);
@@ -31,32 +34,32 @@ d3.csv("data/student_mental_health.csv").then(data => {
     .attr("text-anchor","middle").text(d => `${d.data.label}: ${d.data.count}`);
 
   //Line Chart
-  const rateMap = d3.rollup(
+  const depressRate = d3.rollup(
     data,
     v => d3.mean(v, d => d.depressed === "depressed" ? 1 : 0),
     d => d.cgpa
   );
   // probability of depress in each gpa
-  const rateData = Array.from(rateMap, ([gpa, rate]) => ({ gpa, rate }));
-  const svgLine = d3.select("#lineChart");
+  const depressRateStat = Array.from(depressRate, ([gpa, rate]) => ({ gpa, rate }));
+  const svgline = d3.select("#lineChart");
   const [w, h] = [450, 400]; 
   const m = { left: 60, top: 40, right: 20, bottom: 50 };
   const chartW = w - m.left - m.right, chartH = h - m.top - m.bottom;
-  const x = d3.scalePoint().domain(rateData.map(d => d.gpa)).range([0, chartW]).padding(0.5);
+  const x = d3.scalePoint().domain(depressRateStat.map(d => d.gpa)).range([0, chartW]).padding(0.5);
   const y = d3.scaleLinear().domain([0,1]).range([chartH,0]);
-  const gLine = svgLine.append("g").attr("transform", `translate(${m.left},${m.top})`);
+  const chartContainer = svgline.append("g").attr("transform", `translate(${m.left},${m.top})`);
   
-  gLine.append("g").attr("transform", `translate(0,${chartH})`).call(d3.axisBottom(x));
-  gLine.append("g").call(d3.axisLeft(y).tickFormat(d3.format(".0%")));
-  gLine.append("text").attr("x",chartW/2).attr("y",chartH+40)
+  chartContainer.append("g").attr("transform", `translate(0,${chartH})`).call(d3.axisBottom(x));
+  chartContainer.append("g").call(d3.axisLeft(y).tickFormat(d3.format(".0%")));
+  chartContainer.append("text").attr("x",chartW/2).attr("y",chartH+40)
     .attr("text-anchor","middle").text("GPA Range");
-  gLine.append("text").attr("transform","rotate(-90)")
+  chartContainer.append("text").attr("transform","rotate(-90)")
     .attr("x", -chartH/2).attr("y", -40).attr("text-anchor","middle").text("Depression Rate");
   const lineGen = d3.line().x(d=>x(d.gpa)).y(d=>y(d.rate));
-  gLine.append("path").datum(rateData)
+  chartContainer.append("path").datum(depressRateStat)
     .attr("fill","none").attr("stroke","#03a5fc").attr("stroke-width",2)
     .attr("d", lineGen);
-  gLine.selectAll("circle").data(rateData).enter().append("circle")
+  chartContainer.selectAll("circle").data(depressRateStat).enter().append("circle")
     .attr("cx",d=>x(d.gpa)).attr("cy",d=>y(d.rate)).attr("r",4).attr("fill","#2003fc");
 
   //Sankey Chart
@@ -67,13 +70,13 @@ d3.csv("data/student_mental_health.csv").then(data => {
     if(!nodeIndex.has(name)) { nodeIndex.set(name,idx); sankNodes.push({ name }); idx++; }
     return nodeIndex.get(name);
   }
-  const gpaGroups = d3.rollup(data, v => v.length, d => d.cgpa, d => d.group);
+  const gpamajorTypes = d3.rollup(data, v => v.length, d => d.cgpa, d => d.majorType);
   
-  gpaGroups.forEach((groupMap, gpa) => {
-    groupMap.forEach((count, group) => {
-      const depressedCount = data.filter(d => d.cgpa === gpa && d.group === group && d.depressed === "depressed").length;
+  gpamajorTypes.forEach((majorTypeMap, gpa) => {
+    majorTypeMap.forEach((count, majorType) => {
+      const depressedCount = data.filter(d => d.cgpa === gpa && d.majorType === majorType && d.depressed === "depressed").length;
       const notDepCount = count - depressedCount;
-      const a = addNode(gpa), b = addNode(group);
+      const a = addNode(gpa), b = addNode(majorType);
       sankLinks.push({ source:a, target:b, value:count });
       const c1 = addNode("depressed"), c2 = addNode("not depressed");
       sankLinks.push({ source:b, target:c1, value:depressedCount });

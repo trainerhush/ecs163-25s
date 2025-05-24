@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Mental Health Dashboard</title>
+  <script src="https://d3js.org/d3.v6.min.js"></script>
+  <script src="https://unpkg.com/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+  
+    #dashboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto 1fr;
+      gap: 10px;
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+    }
+
+    #dashboard > * {
+      min-height: 0;
+    }
+    svg {
+      width: 100%;
+      height: 100%;
+      font-family: sans-serif;
+    }
+    .brush .selection {
+      fill: #777;
+      fill-opacity: 0.3;
+      stroke: #fff;
+    }
+    .selected {
+      stroke: red;
+      opacity: 0.8;
+    }
+    .tooltip {
+      position: absolute;
+      background: white;
+      border: 1px solid #ccc;
+      padding: 5px;
+      font-size: 12px;
+      pointer-events: none;
+    }
+    #lineInfo {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 14px;
+      background: rgba(255,255,255,0.8);
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div id="dashboard">
+    <svg id="pieChart" viewBox="0 0 450 400" preserveAspectRatio="xMidYMid meet"></svg>
+    <div style="position:relative; min-height: 0;">
+      
+      <svg id="lineChart" viewBox="25 0 450 400" preserveAspectRatio="xMidYMid meet"></svg>
+      <div id="lineInfo"></div>
+    </div>
+    <div style="grid-column: span 2; text-align: center; font-size:14px; color:#555;">
+      Click to Select Area, Click again to cancel
+    </div>
+    <svg id="sankeyChart" viewBox="0 0 950 500" preserveAspectRatio="xMidYMid meet" style="grid-column: span 2;"></svg>
+  </div>
+  <div id="tooltip" class="tooltip" style="display:none;"></div>
+  <script src="main.js"></script>
+</body>
+</html>
